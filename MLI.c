@@ -28,6 +28,8 @@ static unsigned short r0, r1, r2, r3;
 static unsigned short programCounter;
 // 3-bit Condition Code
 static unsigned short conditionCode;
+// 16-bit instruction register
+static word instructionRegister;
 
 int main(int argc, char * argv[])
 {
@@ -164,6 +166,10 @@ void haltOperation()
 	printBits(r2); // Print out contents of third register
 	printf("Register 3: ");
 	printBits(r3); // Print out contents of fourth register
+	printf("Instruction Register: ");
+	printWord(instructionRegister); // Print out contents of instruction register
+	printf("Condition Code: ");
+	printBits(conditionCode); // Print out final condition code
 
 	// Loop iterates through each 16-bit word in memory and prints its properties
 	for (i = 0; i < programCounter; i++)
@@ -200,4 +206,12 @@ void printBits(unsigned short i)
 	}
 	// Print equivalent values in other numeral systems after binary representation is sent to the console output stream
 	printf("\n");
+}
+
+void printWord(word wrd)
+{
+	printBits(wrd.opcode);
+	printBits(wrd.addressMode);
+	printBits(wrd.registerTarget);
+	printBits(wrd.memoryAddress);
 }

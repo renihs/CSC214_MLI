@@ -60,6 +60,7 @@ int beginExecution(unsigned short firstWord); // Begins executing instructions, 
 void loadOperation();
 void haltOperation();
 void printBits(unsigned short i);
+void printWord(word wrd); // Prints out the 16-bit word in a legible format
 
 
 #endif /* MLI_H_ */
