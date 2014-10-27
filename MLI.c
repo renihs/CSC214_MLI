@@ -75,10 +75,12 @@ int main(int argc, char * argv[])
 
 	//printBits(0xF & 0xA);
 	//printBits(0xF & HLT);
-	//if ((0xF & HLT) == 0xF)
-	//	printf("TRUE\n");
+	if ((0xF & HLT) == 0xF)
+		printf("HLT is TRUE\n");
+	if ((0x1 & LOD) == LOD)
+		printf("LOD is TRUE\n");
 
-	beginExecution(FIRST_WORD); // Call function to begin executing instructions, starting with argument memory address
+	//beginExecution(FIRST_WORD); // Call function to begin executing instructions, starting with argument memory address
 
 	fclose(inputFile); // Terminate program/file connection with input file
 
@@ -133,10 +135,12 @@ int beginExecution(unsigned short firstWord)
 	// Machine Instruction Cycle: Fetch, Decode, Execute, (Writeback)
 	while (1)
 	{
+		instructionRegister = wordMemory[programCounter]; // Load instruction into instruction register
+
 		// Determine which operation to perform
-		if (wordMemory[programCounter].opcode & LOD) // Load operation
+		if (instructionRegister.opcode & LOD) // Load operation
 			loadOperation(); // Call program load function
-		else if ((wordMemory[programCounter].opcode & HLT) == HLT) // Halt operation
+		else if ((instructionRegister.opcode & HLT) == HLT) // Halt operation
 			haltOperation(); // Call program halt function
 		else
 			programCounter++;
@@ -166,10 +170,13 @@ void haltOperation()
 	printBits(r2); // Print out contents of third register
 	printf("Register 3: ");
 	printBits(r3); // Print out contents of fourth register
-	printf("Instruction Register: ");
+	printf("Instruction Register: \n");
 	printWord(instructionRegister); // Print out contents of instruction register
 	printf("Condition Code: ");
 	printBits(conditionCode); // Print out final condition code
+	printf("Program Counter: ");
+	printBits(programCounter); // Print out final program counter value
+	printf("\n");
 
 	// Loop iterates through each 16-bit word in memory and prints its properties
 	for (i = 0; i < programCounter; i++)
