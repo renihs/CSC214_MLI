@@ -22,8 +22,9 @@
 // Represents 256-word memory using 16-bit word addressable
 //static unsigned short wordMemory[256];
 static word wordMemory[MEMORY_SIZE];
-// Four 16-bit registers labeled r0-r3
-static unsigned short r0, r1, r2, r3;
+// Four 16-bit registers (r0-r3)
+static unsigned short registers[4];
+//static unsigned short r0, r1, r2, r3;
 // 8-bit program counter
 static unsigned short programCounter;
 // 3-bit Condition Code
@@ -59,28 +60,18 @@ int main(int argc, char * argv[])
 	}
 
 	/*
-	for (i = 0; i < index; i++)
-	{
-		//printf("%u\n", wordMemory[i]);
-		//printf("%u %u %u %u\n", wordMemory[i].opcode, wordMemory[i].addressMode,
-		//						wordMemory[i].registerTarget, wordMemory[i].memoryAddress);
-		//printBits(wordMemory[i]);
-		printBits(wordMemory[i].opcode);
-		printBits(wordMemory[i].addressMode);
-		printBits(wordMemory[i].registerTarget);
-		printBits(wordMemory[i].memoryAddress);
-		printf("\n");
-	}
-	*/
-
 	//printBits(0xF & 0xA);
 	//printBits(0xF & HLT);
 	if ((0xF & HLT) == 0xF)
 		printf("HLT is TRUE\n");
 	if ((0x1 & LOD) == LOD)
 		printf("LOD is TRUE\n");
+	printf("LOD: %u\n", LOD);
+	printf("0x1: %u\n", 0x1);
+	printf("0x1 & LOD: %u\n", 0x1 & LOD);
+	*/
 
-	//beginExecution(FIRST_WORD); // Call function to begin executing instructions, starting with argument memory address
+	beginExecution(FIRST_WORD); // Call function to begin executing instructions, starting with argument memory address
 
 	fclose(inputFile); // Terminate program/file connection with input file
 
@@ -117,7 +108,7 @@ unsigned short fromStringToBinary(char * str)
 }
 
 // Returns a substring of argument str from begin position to len number of chars.
-// Cannot believe C doesn't have something like this already...
+// Cannot believe C doesn't have something like thiprogramCounters already...
 char * substring(const char * str, size_t begin, size_t len)
 {	// Check arguments for validity
 	if (str == 0 || strlen(str) == 0 || strlen(str) < begin || strlen(str) < (begin+len))
@@ -138,12 +129,13 @@ int beginExecution(unsigned short firstWord)
 		instructionRegister = wordMemory[programCounter]; // Load instruction into instruction register
 
 		// Determine which operation to perform
-		if (instructionRegister.opcode & LOD) // Load operation
+		if (instructionRegister.opcode == LOD) // Load operation
 			loadOperation(); // Call program load function
-		else if ((instructionRegister.opcode & HLT) == HLT) // Halt operation
+		else if (instructionRegister.opcode == HLT) // Halt operation
 			haltOperation(); // Call program halt function
 		else
 			programCounter++;
+
 	}
 
 	return 0; // Successful executions
@@ -151,25 +143,44 @@ int beginExecution(unsigned short firstWord)
 
 void loadOperation()
 {
-	programCounter++;
+	printf("Load Operation\n");
+	// Check memory addressing mode for what to load into the proper register
+	if (instructionRegister.addressMode == 0) // Direct Addressing mode - Get value AT instruction address
+		registers[instructionRegister.registerTarget] = wordMemory[instructionRegister.memoryAddress].memoryAddress;
+	else // Immediate Addressing mode
+		registers[instructionRegister.registerTarget] = instructionRegister.memoryAddress;
+	programCounter++; // Increment the program counter by one
+}
+
+// Function resets the target register to zero
+void clearOperation()
+{
+	printf("Clear Operation\n");
+	registers[instructionRegister.registerTarget] = 0; // Reset target register to value zero
+	programCounter++; // Increment the program counter by one
 }
 
 // Prints out contents of the registers, the program counter, and the condition code,
 // as well as the words executed by the program. Then ends program execution
 void haltOperation()
 {
+	printf("Halt Operation\n");
 	int i; // Increment variable used in for loop
 
 	programCounter++; // Increment program counter by one
 
 	printf("Accumulator: ");
-	printBits(r0); // Print out contents of accumulator register
+	printBits(registers[0]);
+	//printBits(r0); // Print out contents of accumulator register
 	printf("Register 1: ");
-	printBits(r1); // Print out contents of second register
+	printBits(registers[1]);
+	//printBits(r1); // Print out contents of second register
 	printf("Register 2: ");
-	printBits(r2); // Print out contents of third register
+	printBits(registers[2]);
+	//printBits(r2); // Print out contents of third register
 	printf("Register 3: ");
-	printBits(r3); // Print out contents of fourth register
+	printBits(registers[3]);
+	//printBits(r3); // Print out contents of fourth register
 	printf("Instruction Register: \n");
 	printWord(instructionRegister); // Print out contents of instruction register
 	printf("Condition Code: ");
